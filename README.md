@@ -1,4 +1,4 @@
-Welcome to DataDive, a project that we worked on between November 2019 and June 2020.<br>
+Welcome to DataDive, a project that we worked on between November 2019 and June 2020, during our last year of Master of Big Data : Intelligent Distributed Systems, in the university of Cergy-Pontoise, France. We had to work remotely during COVID19 but it didn't stop us.<br>
 The project was initially called <b>Pattern and trends mining on YELP Data : an application on smart restaurant recommandations</b> but we baptised it as DataDive.
 
 We worked on a remote server since our personal computers didn't have the sufficient memory and CPU to whistand the Data of YELP, which we still had to reduce with 25GB of memory. <br>
