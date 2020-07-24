@@ -1,0 +1,400 @@
+{% extends 'layouts/base.html' %}
+{% load datadive_extras %}
+{% block index %}
+
+    <div class="business-details">
+        <figure class="snip0016">
+            <img src="{{ image }}">
+            {% if input_business_id != "" %}
+                <figcaption>
+                    <h2>Because you loved <br><span>{{ input_business_id.name }}</span></h2>
+                    <p>{{ input_business_id.categories }}<br>Content score : {{ content_score|floatformat:2 }}<br>
+                        Score : {{ score|floatformat:2 }}</p>
+                </figcaption>
+            {% endif %}
+        </figure>
+        <div class="business-general">
+            <div id="business-name">{{ business.name|truncatechars:24 }}</div>
+            <div id="business-address">{{ business.address|truncatechars:30 }}, {{ business.postal_code }}, {{ business.city }}, {{ business.state }}</div>
+            <div class="star-rating">
+                <div class="back-stars">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+
+                    <div class="front-stars" style="width: {{ business.stars|multiply:20 }}%">
+                        <i class="fa fa-star" aria-hidden="true"></i>
+                        <i class="fa fa-star" aria-hidden="true"></i>
+                        <i class="fa fa-star" aria-hidden="true"></i>
+                        <i class="fa fa-star" aria-hidden="true"></i>
+                        <i class="fa fa-star" aria-hidden="true"></i>
+                    </div>
+                </div>
+                <p id="business-review">{{ business.review_count|thousand }} reviews</p>
+            </div>
+            <div id="business-categories">{{ business.categories|truncatechars:45 }}</div>
+            <div id="business-categories-label">Type : {{ business.categories_label }}</div>
+            <div id="business-hours">
+                <div id="business-hours-left">Hours :</div>
+                <div id="business-hours-right">
+                    {% for key,value in business.hours|sort_day %}
+                        <div id="business-hours-line">
+                            <div id="business-day">{{ key }} :</div>
+                            <div id="business-hour">{{ value }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="info">
+        <div id="info-left">
+            <div class="score">
+                <div id="rating"></div>
+            </div>
+            <div class="based-on">Based on {{ business.review_count|thousand }} reviews</div>
+            <div class="info-logo">
+                <i class="fas fa-info-circle fa-2x"></i>
+                <div class="info-name">Informations</div>
+            </div>
+            <div class="attributes">
+                {% for key,value in business.attributes.items %}
+                    <p>{{ key }} :
+                        {% if value|get_value == False %}
+                            {{ value|vf|replace_str }}
+                        {% else %}
+                            {% for x in value|convert_list %}
+                                <span>{{ x }}</span>
+                            {% endfor %}
+                        {% endif %}</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div id="info-right">
+            <div class="affluence">
+                <button onclick="openCity('daily')"><i class="far fa-chart-bar"></i> Daily/Weekly Affluence</button>
+                <button onclick="openCity('monthly')"><i class="far fa-chart-bar"></i> Monthly/Annual Affluence
+                </button>
+            </div>
+
+            <div id="daily" class="w3-container city daily">
+                <div id="chart-hours" style="height: 50%"></div>
+                <div id="chart-daily" style="height: 50%"></div>
+            </div>
+
+            <div id="monthly" class="w3-container city annual daily">
+                <div id="chart-monthly" style="height: 50%"></div>
+                <div id="chart-annual" style="height: 50%"></div>
+                {% for key, value in affluences_years.items %}
+                    {{ key }}
+                    {{ value }}
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+    <section class="reviews">
+        {% for i in reviews %}
+            {% for key, value in i.items %}
+                <article>
+                    <div id="comment-left">
+                        {{ value.user_id|get_name }}<br>
+                        <div id="stars">
+                            <div class="star-rating">
+                                <div class="back-stars">
+                                    <i class="fa fa-star" aria-hidden="true"></i>
+                                    <i class="fa fa-star" aria-hidden="true"></i>
+                                    <i class="fa fa-star" aria-hidden="true"></i>
+                                    <i class="fa fa-star" aria-hidden="true"></i>
+                                    <i class="fa fa-star" aria-hidden="true"></i>
+
+                                    <div class="front-stars" style="width: {{ value.stars|multiply:20 }}%">
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p>{{ value.date|get_date }}</p>
+                    </div>
+                    <div id="comment-right">
+                        {{ value.text }}
+                    </div>
+                </article>
+                <hr>
+            {% endfor %}
+        {% endfor %}
+    </section>
+
+    <script type="text/babel">
+        // Calculate circumference
+        const getCircumference = (radius) => Math.floor(Math.PI * (radius * 2));
+
+        // Returns value to fill SVG - by tenth of the circumference
+        const getCircleSection = (radius, section) =>
+            Math.floor(
+                getCircumference(radius) - section * (getCircumference(radius) / 10)
+            );
+
+        const CircleRating = ({rating, radius, strokeWidth}) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="130" height="130">
+                <defs>
+                    <linearGradient
+                        id="diagonal-gradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="100%"
+                    >
+                        <stop stopColor="green" offset="25%"/>
+                        <stop stopColor="green" offset="70%"/>
+                    </linearGradient>
+                </defs>
+                <circle
+                    cx={radius + 15}
+                    cy={radius + 15}
+                    r={radius}
+                    stroke="lightgrey"
+                    strokeWidth={strokeWidth}
+                    fill="transparent"
+                />
+                <circle
+                    cx={radius + 15}
+                    cy={radius + 15}
+                    r={radius}
+                    stroke="url(#diagonal-gradient)"
+                    strokeLinecap="round"
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={getCircumference(radius)}
+                    strokeDashoffset={getCircleSection(radius, rating)}
+                    fill="transparent"
+                >
+                    <animate
+                        attributeName="stroke-dashoffset"
+                        values={`${getCircumference(radius)};${getCircleSection(
+                            radius,
+                            rating
+                        )}`}
+                        dur="1s"
+                    />
+                </circle>
+                <text x="36" y="75" fontSize="25" fill="#2c2c2c">
+                    {rating}/₁₀
+                </text>
+            </svg>
+        );
+
+        ReactDOM.render(
+            <CircleRating rating="{{ business.stars|multiply:2 }}" radius={50} strokeWidth="15"/>,
+            document.getElementById("rating")
+        );
+    </script>
+    <script>
+        function openCity(cityName) {
+            var i;
+            var x = document.getElementsByClassName("city");
+            for (i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+            document.getElementById(cityName).style.display = "block";
+        }
+    </script>
+    <!-- Chart code -->
+    <script>
+        am4core.ready(function () {
+
+            // Themes begin
+            am4core.useTheme(am4themes_animated);
+            // Themes end
+
+            // Create chart instance
+            var chart = am4core.create("chart-hours", am4charts.XYChart);
+
+            // Add data
+            chart.data = [
+                {% for key, value in affluences_hours%}
+                    {
+                        "hour": "{{ key }}h",
+                        "visits": {{value}}
+                    },
+                {% endfor %}
+            ];
+
+            // Create axes
+            var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+            categoryAxis.dataFields.category = "hour";
+            categoryAxis.renderer.grid.template.location = 0;
+            categoryAxis.renderer.minGridDistance = 25;
+            chart.logo.disabled = true;
+
+            var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+            categoryAxis.renderer.grid.template.disabled = true;
+            valueAxis.renderer.grid.template.disabled = true;
+            valueAxis.renderer.labels.template.disabled = true;
+            // Create series
+            var series = chart.series.push(new am4charts.ColumnSeries());
+            series.dataFields.valueY = "visits";
+            series.dataFields.categoryX = "hour";
+            series.name = "Visits";
+            series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+            series.columns.template.fillOpacity = .8;
+            series.columns.template.fill = am4core.color("#1a73e8");
+            series.columns.template.stroke = am4core.color("#1a73e8");
+            var columnTemplate = series.columns.template;
+            columnTemplate.strokeWidth = 2;
+            columnTemplate.strokeOpacity = 1;
+
+        }); // end am4core.ready()
+    </script>
+    <script>
+        am4core.ready(function () {
+
+            // Themes begin
+            am4core.useTheme(am4themes_animated);
+            // Themes end
+
+            // Create chart instance
+            var chart = am4core.create("chart-daily", am4charts.XYChart);
+
+            // Add data
+            chart.data = [
+                {% for key, value in affluences_days|sort_day%}
+                    {
+                        "day": "{{ key|get_3 }}",
+                        "visits": {{value}}
+                    },
+                {% endfor %}
+            ];
+
+            // Create axes
+            var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+            categoryAxis.dataFields.category = "day";
+            categoryAxis.renderer.grid.template.location = 0;
+            categoryAxis.renderer.minGridDistance = 25;
+
+            chart.logo.disabled = true;
+            var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+            categoryAxis.renderer.grid.template.disabled = true;
+            valueAxis.renderer.grid.template.disabled = true;
+            valueAxis.renderer.labels.template.disabled = true;
+            // Create series
+            var series = chart.series.push(new am4charts.ColumnSeries());
+            series.dataFields.valueY = "visits";
+            series.dataFields.categoryX = "day";
+            series.name = "Visits";
+            series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+            series.columns.template.fillOpacity = .8;
+            series.columns.template.fill = am4core.color("#1a73e8");
+            series.columns.template.stroke = am4core.color("#1a73e8");
+            var columnTemplate = series.columns.template;
+            columnTemplate.strokeWidth = 2;
+            columnTemplate.strokeOpacity = 1;
+
+
+        }); // end am4core.ready()
+    </script>
+    <script>
+        am4core.ready(function () {
+
+            // Themes begin
+            am4core.useTheme(am4themes_animated);
+            // Themes end
+
+            // Create chart instance
+            var chart = am4core.create("chart-monthly", am4charts.XYChart);
+
+            // Add data
+            chart.data = [
+                {% for key, value in affluences_months%}
+                    {
+                        "month": "{{ key|get_3 }}",
+                        "visits": {{value}}
+                    },
+                {% endfor %}
+            ];
+
+            // Create axes
+            var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+            categoryAxis.dataFields.category = "month";
+            categoryAxis.renderer.grid.template.location = 0;
+            categoryAxis.renderer.minGridDistance = 25;
+
+            chart.logo.disabled = true;
+            var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+            categoryAxis.renderer.grid.template.disabled = true;
+            valueAxis.renderer.grid.template.disabled = true;
+            valueAxis.renderer.labels.template.disabled = true;
+            // Create series
+            var series = chart.series.push(new am4charts.ColumnSeries());
+            series.dataFields.valueY = "visits";
+            series.dataFields.categoryX = "month";
+            series.name = "Visits";
+            series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+            series.columns.template.fillOpacity = .8;
+            series.columns.template.fill = am4core.color("#1a73e8");
+            series.columns.template.stroke = am4core.color("#1a73e8");
+            var columnTemplate = series.columns.template;
+            columnTemplate.strokeWidth = 2;
+            columnTemplate.strokeOpacity = 1;
+
+
+        }); // end am4core.ready()
+    </script>
+    <script>
+        am4core.ready(function () {
+
+            // Themes begin
+            am4core.useTheme(am4themes_animated);
+            // Themes end
+
+            // Create chart instance
+            var chart = am4core.create("chart-annual", am4charts.XYChart);
+
+            // Add data
+            chart.data = [
+                {% for key, value in affluences_years %}
+                    {
+                        "year": "{{ key }}",
+                        "visits": {{value}}
+                    },
+                {% endfor %}
+            ];
+
+            // Create axes
+            var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+            categoryAxis.dataFields.category = "year";
+            categoryAxis.renderer.minGridDistance = 2;
+            categoryAxis.renderer.grid.template.location = 0;
+
+            chart.logo.disabled = true;
+            var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+            valueAxis.baseValue = 0;
+            categoryAxis.renderer.grid.template.disabled = true;
+            valueAxis.renderer.grid.template.disabled = true;
+            valueAxis.renderer.labels.template.disabled = true;
+// Create series
+            var series = chart.series.push(new am4charts.LineSeries());
+            series.dataFields.valueY = "visits";
+            series.dataFields.categoryX = "year";
+            series.strokeWidth = 4;
+            series.strokeOpacity = 2;
+            series.tensionX = 0.77;
+
+// bullet is added because we add tooltip to a bullet for it to change color
+            var bullet = series.bullets.push(new am4charts.Bullet());
+            bullet.tooltipText = "{valueY}";
+
+            var range = valueAxis.createSeriesRange(series);
+            range.value = 0;
+            range.endValue = -1000;
+            range.contents.stroke = am4core.color("#FF0000");
+            range.contents.fill = range.contents.stroke;
+
+        }); // end am4core.ready()
+    </script>
+{% endblock %}

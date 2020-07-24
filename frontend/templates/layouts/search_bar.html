@@ -1,0 +1,11 @@
+<div class="search-bar">
+    <form method="post" action={% url 'search' %}>{% csrf_token %}
+        <input type="text" placeholder='What do you want ?' name="keyword">
+        <button type="submit"><i class="fa fa-search fa-2x"></i></button>
+        <div id="location">
+            <a href="{% url 'geolocation' %}">
+                <i class="fas fa-location-arrow"></i>Around me
+            </a>
+        </div>
+    </form>
+</div>

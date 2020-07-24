@@ -1,0 +1,152 @@
+{% extends 'layouts/base.html' %}
+{% load datadive_extras %}
+{% block index %}
+    {% include 'layouts/search_bar.html' %}
+    {% include 'layouts/categories_bar.html' %}
+    {% if request.session.user_id %}
+        {% if request.session.user_id != "new_user" %}
+            <div class="recommandation">
+                <p id="foryou">Recommended for you</p>
+                <ul>
+                    {% for business in cb_user_id %}
+                        <li>
+                            <a class="tooltip"
+                               href="{% url 'business' business_id=business.business_id %}"><span
+                                    class="tooltiptext">Score : {{ business.score|multiply:100|floatformat:0 }} %<br>Distance : {{ business.distance|floatformat }} km<br>{{ business.categories }}</span>
+                                <img src={{ business.business_id|get_image }}><br/>
+                                <span id="name"
+                                      title={{ business.name }}>{{ business.name|truncatechars:22 }}<br></span>
+                                <div class="star-rating">
+                                    <div class="back-stars">
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+
+                                        <div class="front-stars"
+                                             style="width: {{ business.stars|multiply:20 }}%">
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <p>{{ business.review_count|thousand }} reviews</p>
+                                </div>
+                                <span id="city">{{ business.city }}, {{ business.state }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    {% endif %}
+    <div class="wrapper">
+        <section>
+            {% for business in default_businesses %}
+                <article>
+                    {% if request.session.user_id and request.session.user_id != "new_user" %}
+                        <a class="tooltip-map" href="{% url 'business' business_id=business.business_id %}">
+                        <span
+                                class="tooltiptext-map">{{ business.score|multiply:100|floatformat:0 }} %</span>
+                    {% else %}
+                        <a href="{% url 'business' business_id=business.business_id %}">
+                    {% endif %}
+                    <div class="business">
+                        <img src={{ business.business_id|get_image }}>
+                        <div id="description">
+                            <div class="business-title"> {{ business.name|truncatechars:35 }}</div>
+                            <div class="star-rating">
+                                <div class="back-stars">
+                                    <i class="fa fa-star" aria-hidden="true"></i>
+                                    <i class="fa fa-star" aria-hidden="true"></i>
+                                    <i class="fa fa-star" aria-hidden="true"></i>
+                                    <i class="fa fa-star" aria-hidden="true"></i>
+                                    <i class="fa fa-star" aria-hidden="true"></i>
+
+                                    <div class="front-stars"
+                                         style="width: {{ business.stars|multiply:20 }}%">
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                                <p>{{ business.review_count|thousand }} reviews</p>
+                            </div>
+                            <div class="address">
+                                {{ business.address|truncatechars:50 }}<br>
+                                {{ business.city }}, {{ business.state }}<br>
+                                {% if request.session.city %}
+                                    {{ business.distance|floatformat }} km from your position
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    </a>
+                </article>
+            {% endfor %}
+        </section>
+
+        <aside id="navigation">{{ my_map|safe }}</aside>
+    </div>
+    {% if request.session.user_id %}
+        {% if request.session.user_id != "new_user" %}
+            <div class="recommandation" style="position:relative;margin-top: 1000px;z-index: 99">
+                <p id="cf-foryou">User like you also like</p>
+                <ul>
+                    {% for business in cf_user_id %}
+                        <li>
+                            <a class="tooltip"
+                               href="{% url 'business' business_id=business.business_id %}"><span
+                                    class="tooltiptext">Score : {{ business.score|floatformat:3 }}<br>{{ business.categories }}</span>
+                                <img src={{ business.business_id|get_image }}><br/>
+                                <span id="name"
+                                      title={{ business.name }}>{{ business.name|truncatechars:22 }}<br></span>
+                                <div class="star-rating">
+                                    <div class="back-stars">
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+                                        <i class="fa fa-star" aria-hidden="true"></i>
+
+                                        <div class="front-stars"
+                                             style="width: {{ business.stars|multiply:20 }}%">
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                        </div>
+                                    </div>
+                                    <p>{{ business.review_count|thousand }} reviews</p>
+                                </div>
+                                <span id="cf-city">{{ business.city }}, {{ business.state }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    {% endif %}
+    <script>
+        window.onscroll = function () {
+            myFunction()
+        };
+
+        var navbar = document.getElementById("navigation");
+        var sticky = navbar.offsetTop;
+
+        function myFunction() {
+            if (window.pageYOffset >= sticky) {
+                navbar.classList.add("sticky")
+            } else {
+                navbar.classList.remove("sticky");
+            }
+        }
+    </script>
+{% endblock %}

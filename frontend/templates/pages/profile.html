@@ -1,0 +1,54 @@
+{% extends 'layouts/base.html' %}
+{% load datadive_extras %}
+{% block index %}
+    <div class="profile">
+        <div class="user_select">
+            <form method="post" action={% url 'profile' %}>{% csrf_token %}
+                <select name="user_id">
+                    <option value="new_user">New user</option>
+                    {% for i in users %}
+                        <option value={{ i }}>{{ i }}</option>
+                    {% endfor %}
+                </select>
+                <button>Select</button>
+            </form>
+        </div>
+        {% for i in info %}
+            {% for key, user in i.items %}
+                <div class="details">
+                    <form method="post" action="{% url 'profile' %}">{% csrf_token %}
+                        <fieldset id="personal-details">
+                            <legend>Personal Details</legend>
+                            {% if user.name %}
+                                <div class="input-container" id="user_name">
+                                    <label for="postal">Name : {{ user.name }}</label>
+                                </div>
+                                <div class="input-container" id="user_id">
+                                    <label for="city">User ID : {{ user.user_id }}</label>
+                                </div>
+                                <div class="input-container" id="left">
+                                    <label for="first-name">Member since : {{ user.yelping_since|get_date }}</label>
+                                </div>
+                                <div class="input-container" id="right">
+                                    <label for="last-name">Friends : {{ user.friends|size }}</label>
+                                </div>
+                                <div class="input-container" id="left">
+                                    <label for="first-name">Review count : {{ user.review_count }}</label>
+                                </div>
+                                <div class="input-container" id="right">
+                                    <label for="last-name">Average stars : {{ user.average_stars }}</label>
+                                </div>
+                            {% endif %}
+                            <div class="input-container" id="address">
+                                <input type="text" name="address" placeholder="Recently geolocated in {{ city }}"/>
+                            </div>
+                        </fieldset>
+                        <button>Submit</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endblock %}
+
+
