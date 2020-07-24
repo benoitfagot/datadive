@@ -12,7 +12,7 @@ The tasks consisted in :
 <br>
 <br>
 Disclaimer : unfortunately, most of our cleaned datasets were lost with the closure of the servers and need to be generated again (with a big memory cost) for the recommandation engine to work.
-
+<br>
 
 Members :
 <br>
