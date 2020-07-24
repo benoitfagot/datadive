@@ -15,8 +15,9 @@ Disclaimer : unfortunately, most of our cleaned datasets were lost with the clos
 
 
 Members :
-@benoitfagot
-@hongphuc95
-Mohamed II Bayo
-Mina
-Ali
+<br>
+@benoitfagot<br>
+@hongphuc95<br>
+Mohamed II Bayo<br>
+Mina<br>
+Ali<br>
